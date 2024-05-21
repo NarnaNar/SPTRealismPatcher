@@ -27,7 +27,18 @@ namespace SPTRealismPatcher
         {
 
             ItemsToAdd = new List<ItemToAdd>();
-            foreach (var file in Directory.GetFiles(txtNewItemsPath.Text))
+
+            string[] filesToPatch;
+            if (File.Exists(txtNewItemsPath.Text))
+            {
+                filesToPatch = new string[1] { txtNewItemsPath.Text };
+            }
+            else
+            {
+                filesToPatch = Directory.GetFiles(txtNewItemsPath.Text);
+            }
+
+            foreach (var file in filesToPatch)
             {
                 foreach (var item in JObject.Parse(File.ReadAllText(file)))
                 {
@@ -102,6 +113,7 @@ namespace SPTRealismPatcher
 
             List<RealismTemplate> newItems = new List<RealismTemplate>();
 
+            //make new realism compatible template from clone with itemid of mod
             var query = from items in ItemsToAdd.Where(x => !PatchedItems.Any(z => z.ItemID == x.ItemID))
                         join templates in Templates
                             on items.ItemTplToClone equals templates.ItemID
@@ -110,6 +122,16 @@ namespace SPTRealismPatcher
 
 
             newItems.AddRange(query);
+
+            //If a mod references items from itself
+            query = from items in ItemsToAdd.Where(x => !newItems.Any(z => z.ItemID == x.ItemID))
+                        join clonedItems in newItems
+                            on items.ItemTplToClone equals clonedItems.ItemID
+                        where clonedItems != null
+                        select new RealismTemplate(items.ItemID, items.ItemName, clonedItems.Properties);
+
+            newItems.AddRange(query);
+
 
             StringBuilder sb = new StringBuilder();
             StringWriter sw = new StringWriter(sb);
@@ -132,9 +154,6 @@ namespace SPTRealismPatcher
                 writer.WriteEndObject();
             }
             File.WriteAllLines(textBox1.Text, sb.ToString().Split(@"\r\n"));    
-
-            //lvToPatch.Items.AddRange(ItemsToAdd.Select(x => new ListViewItem { Text = x.ItemID }).ToArray());
-
         }
 
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
