@@ -47,7 +47,7 @@ namespace SPTRealismPatcher
                         ItemToAdd itemToAdd = (ItemToAdd)JsonConvert.DeserializeObject(item.Value.ToString(), typeof(ItemToAdd));
                         itemToAdd.ItemID = item.Key;
 
-                        if (itemToAdd.Properties["item"]["_name"] != null) //moxopixel
+                        if (itemToAdd.Properties["item"] != null && itemToAdd.Properties["item"]["_name"] != null) //moxopixel
                         {
                             if (itemToAdd.Properties["clone"] == null)
                             {
@@ -59,7 +59,7 @@ namespace SPTRealismPatcher
                         }
                         else
                         {
-                            itemToAdd.ItemName = itemToAdd.Properties["overrideProperties"]["Prefab"]["path"].ToString();
+                            itemToAdd.ItemName = itemToAdd.Properties["locales"]["en"]["shortName"].ToString().ToLower().Replace(" ","_");
                             
                             itemToAdd.ItemName = itemToAdd.ItemName.Split("/").Last();
                             itemToAdd.ItemName = itemToAdd.ItemName.Split(".").First();
@@ -124,7 +124,7 @@ namespace SPTRealismPatcher
             newItems.AddRange(query);
 
             //If a mod references items from itself
-            query = from items in ItemsToAdd.Where(x => !newItems.Any(z => z.ItemID == x.ItemID))
+            query = from items in ItemsToAdd.Where(x => !newItems.Any(z => z.ItemID == x.ItemID) && !PatchedItems.Any(z => z.ItemID == x.ItemID))
                         join clonedItems in newItems
                             on items.ItemTplToClone equals clonedItems.ItemID
                         where clonedItems != null
@@ -132,6 +132,14 @@ namespace SPTRealismPatcher
 
             newItems.AddRange(query);
 
+            //If a mod references items that have been patched already
+            query = from items in ItemsToAdd.Where(x => !newItems.Any(z => z.ItemID == x.ItemID) && !PatchedItems.Any(z => z.ItemID == x.ItemID))
+                    join patchedItems in PatchedItems
+                        on items.ItemTplToClone equals patchedItems.ItemID
+                    where patchedItems != null
+                    select new RealismTemplate(items.ItemID, items.ItemName, patchedItems.Properties);
+
+            newItems.AddRange(query);
 
             StringBuilder sb = new StringBuilder();
             StringWriter sw = new StringWriter(sb);
@@ -145,7 +153,7 @@ namespace SPTRealismPatcher
                 {
                     if (Templates.Any(x => x.Name == item.Name) || newItems.Any(x => item.Name == x.Name && item.ItemID != x.ItemID))
                     {
-                        item.Name = Interaction.InputBox("Item Name is not unique." + Environment.NewLine + item.Properties["locales"]["en"]["name"], "Name Error", item.Name + item.Properties["locales"]["en"]["shortName"]);
+                        item.Name = Interaction.InputBox("Item Name is not unique." + Environment.NewLine + item.Name, "Name Error", item.Name);
                     }
 
                     writer.WritePropertyName(item.ItemID);
@@ -153,7 +161,8 @@ namespace SPTRealismPatcher
                 }
                 writer.WriteEndObject();
             }
-            File.WriteAllLines(textBox1.Text, sb.ToString().Split(@"\r\n"));    
+            File.WriteAllLines(textBox1.Text, sb.ToString().Split(@"\r\n"));
+            MessageBox.Show($"File with {newItems.Count} Items created.");
         }
 
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
