@@ -54,15 +54,16 @@ namespace SPTRealismPatcher
                                 continue;
                             }
 
-                            itemToAdd.ItemName = itemToAdd.Properties["item"]["_name"].ToString();
+                            itemToAdd.ItemFullName = itemToAdd.Properties["item"]["_name"].ToString();
                             itemToAdd.ItemTplToClone = itemToAdd.Properties["clone"].ToString();
                         }
                         else
                         {
-                            itemToAdd.ItemName = itemToAdd.Properties["locales"]["en"]["shortName"].ToString().ToLower().Replace(" ","_");
-                            
-                            itemToAdd.ItemName = itemToAdd.ItemName.Split("/").Last();
-                            itemToAdd.ItemName = itemToAdd.ItemName.Split(".").First();
+                            itemToAdd.ItemName = itemToAdd.Properties["locales"]["en"]["name"].ToString();
+
+                            itemToAdd.ItemFullName = itemToAdd.Properties["locales"]["en"]["name"].ToString().ToLower().Replace(" ", "_").Replace(".", "_");
+                            itemToAdd.ItemFullName = itemToAdd.ItemFullName.Split("/").Last();
+                            itemToAdd.ItemFullName = itemToAdd.ItemFullName.Split(".").First();
                         }
 
 
@@ -98,7 +99,7 @@ namespace SPTRealismPatcher
             }
 
             PatchedItems = new List<RealismTemplate>();
-            foreach (var directory in Directory.GetDirectories(txtExistingPatchPath.Text))
+            foreach (var directory in Directory.GetDirectories(txtExistingPatchPath.Text).Append(txtExistingPatchPath.Text))
             {
                 foreach (var file in Directory.GetFiles(directory))
                 {
@@ -118,7 +119,7 @@ namespace SPTRealismPatcher
                         join templates in Templates
                             on items.ItemTplToClone equals templates.ItemID
                         where templates != null
-                        select new RealismTemplate(items.ItemID, items.ItemName, templates.Properties);
+                        select new RealismTemplate(items.ItemID, items.ItemFullName, templates.Properties, items.ItemName);
 
 
             newItems.AddRange(query);
@@ -128,7 +129,7 @@ namespace SPTRealismPatcher
                         join clonedItems in newItems
                             on items.ItemTplToClone equals clonedItems.ItemID
                         where clonedItems != null
-                        select new RealismTemplate(items.ItemID, items.ItemName, clonedItems.Properties);
+                        select new RealismTemplate(items.ItemID, items.ItemFullName, clonedItems.Properties, items.ItemName);
 
             newItems.AddRange(query);
 
@@ -137,7 +138,7 @@ namespace SPTRealismPatcher
                     join patchedItems in PatchedItems
                         on items.ItemTplToClone equals patchedItems.ItemID
                     where patchedItems != null
-                    select new RealismTemplate(items.ItemID, items.ItemName, patchedItems.Properties);
+                    select new RealismTemplate(items.ItemID, items.ItemFullName, patchedItems.Properties, items.ItemName);
 
             newItems.AddRange(query);
 
@@ -153,7 +154,7 @@ namespace SPTRealismPatcher
                 {
                     if (Templates.Any(x => x.Name == item.Name) || newItems.Any(x => item.Name == x.Name && item.ItemID != x.ItemID))
                     {
-                        item.Name = Interaction.InputBox("Item Name is not unique." + Environment.NewLine + item.Name, "Name Error", item.Name);
+                        item.Name = Interaction.InputBox("Item Name is not unique." + Environment.NewLine + (item.LocaleName == "" ? item.Name : item.LocaleName), "Name Error", item.Name);
                     }
 
                     writer.WritePropertyName(item.ItemID);

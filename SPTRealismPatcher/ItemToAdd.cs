@@ -13,12 +13,13 @@ namespace SPTRealismPatcher
         public ItemToAdd(string itemID, string itemName, string itemTplToClone)
         {
             ItemID = itemID;
-            ItemName = itemName;
+            ItemFullName = itemName;
             ItemTplToClone = itemTplToClone;
         }
 
         public string ItemID { get; set; }
-        public string ItemName { get; set; }
+        public string ItemFullName { get; set; }
+        public string ItemName { get; set; }    
         public string ItemTplToClone { get; set; }
 
         [JsonExtensionData]
