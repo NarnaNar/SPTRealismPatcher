@@ -17,6 +17,7 @@ namespace SPTRealismPatcher
             ItemTplToClone = itemTplToClone;
         }
 
+        public string OrigFileName { get; set; }
         public string ItemID { get; set; }
         public string ItemFullName { get; set; }
         public string ItemName { get; set; }    

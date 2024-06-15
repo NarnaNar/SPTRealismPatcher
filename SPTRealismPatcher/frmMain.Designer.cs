@@ -36,6 +36,7 @@
             lblPatchPath = new Label();
             cmdLoadFiles = new Button();
             textBox1 = new TextBox();
+            chkKeepOriginalFileStructure = new CheckBox();
             SuspendLayout();
             // 
             // txtTemplatesPath
@@ -103,11 +104,22 @@
             textBox1.Size = new Size(616, 23);
             textBox1.TabIndex = 11;
             // 
+            // chkKeepOriginalFileStructure
+            // 
+            chkKeepOriginalFileStructure.AutoSize = true;
+            chkKeepOriginalFileStructure.Location = new Point(922, 135);
+            chkKeepOriginalFileStructure.Name = "chkKeepOriginalFileStructure";
+            chkKeepOriginalFileStructure.Size = new Size(164, 19);
+            chkKeepOriginalFileStructure.TabIndex = 12;
+            chkKeepOriginalFileStructure.Text = "Keep original file structure";
+            chkKeepOriginalFileStructure.UseVisualStyleBackColor = true;
+            // 
             // frmMain
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1108, 185);
+            ClientSize = new Size(1108, 173);
+            Controls.Add(chkKeepOriginalFileStructure);
             Controls.Add(textBox1);
             Controls.Add(cmdLoadFiles);
             Controls.Add(lblPatchPath);
@@ -119,6 +131,7 @@
             Name = "frmMain";
             Text = "Form1";
             FormClosing += frmMain_FormClosing;
+            Load += frmMain_Load;
             ResumeLayout(false);
             PerformLayout();
         }
@@ -132,5 +145,6 @@
         private Label lblPatchPath;
         private Button cmdLoadFiles;
         private TextBox textBox1;
+        private CheckBox chkKeepOriginalFileStructure;
     }
 }
