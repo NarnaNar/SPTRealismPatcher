@@ -10,13 +10,14 @@ namespace SPTRealismPatcher
 {
     internal class RealismTemplate
     {
-        public RealismTemplate(string itemID, string name, JObject properties, string localeName, string origFileName)
+        public RealismTemplate(string itemID, string name, JObject properties, string localeName, string origFileName, string? templateID)
         {
             ItemID = itemID;
             Name = name;
             Properties = properties;
             LocaleName = localeName;
             OrigFileName = origFileName;
+            TemplateID = templateID;
         }
 
         [JsonIgnore]
@@ -27,6 +28,8 @@ namespace SPTRealismPatcher
 
         public string ItemID { get; set; }
         public string Name { get; set; }
+
+        public string? TemplateID { get; set; }
 
         [JsonExtensionData]
         public JObject Properties { get; set; }

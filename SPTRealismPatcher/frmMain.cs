@@ -49,7 +49,7 @@ namespace SPTRealismPatcher
                         itemToAdd.ItemID = item.Key;
                         itemToAdd.OrigFileName = Path.GetFileName(file);
 
-                        if (itemToAdd.Properties["item"] != null && itemToAdd.Properties["item"]["_name"] != null) //moxopixel
+                        if (itemToAdd.Properties["item"] != null && itemToAdd.Properties["item"]["_name"] != null && itemToAdd.Properties["sptID"] == null) //moxopixel
                         {
                             if (itemToAdd.Properties["clone"] == null)
                             {
@@ -59,24 +59,23 @@ namespace SPTRealismPatcher
                             itemToAdd.ItemFullName = itemToAdd.Properties["item"]["_name"].ToString();
                             itemToAdd.ItemTplToClone = itemToAdd.Properties["clone"].ToString();
                         }
-                        //else if (itemToAdd.Properties["cloneCompats"] != null) //Artem
-                        //{
-                        //    if (itemToAdd.Properties["clone"] == null)
-                        //    {
-                        //        continue;
-                        //    }
+                        else if (itemToAdd.Properties["sptID"] != null) //Artem
+                        {
+                            if (itemToAdd.Properties["clone"] == null)
+                            {
+                                continue;
+                            }
 
-                        //    itemToAdd.ItemName = itemToAdd.ItemID = item.Key;
-                        //    itemToAdd.ItemID = itemToAdd.Properties["sptID"].ToString();
-                        //    itemToAdd.ItemFullName = itemToAdd.Properties["locales"]["en"]["name"].ToString()
-                        //        .ToLower()
-                        //        .Replace(" ", "_")
-                        //        .Replace(".", "_")
-                        //        .Replace(")", "")
-                        //        .Replace("(", "");
+                            itemToAdd.ItemID = itemToAdd.Properties["sptID"].ToString();
+                            itemToAdd.ItemFullName = itemToAdd.Properties["locales"]["en"]["Name"].ToString()
+                                .ToLower()
+                                .Replace(" ", "_")
+                                .Replace(".", "_")
+                                .Replace(")", "")
+                                .Replace("(", "");
 
-                        //    itemToAdd.ItemTplToClone = itemToAdd.Properties["clone"].ToString();
-                        //}
+                            itemToAdd.ItemTplToClone = itemToAdd.Properties["clone"].ToString();
+                        }
                         else
                         {
                             itemToAdd.ItemName = itemToAdd.Properties["locales"]["en"]["name"].ToString();
@@ -135,7 +134,7 @@ namespace SPTRealismPatcher
             }
 
             List<RealismTemplate> newItems = getNewItemList();
-            
+
             savePatchedItemsToFile(newItems);
 
             MessageBox.Show($"File with {newItems.Count} Items created.");
@@ -145,7 +144,7 @@ namespace SPTRealismPatcher
         {
             if (chkKeepOriginalFileStructure.Checked)
             {
-                if(!Directory.Exists(textBox1.Text))
+                if (!Directory.Exists(textBox1.Text))
                 {
                     Directory.CreateDirectory(textBox1.Text);
                 }
@@ -173,7 +172,12 @@ namespace SPTRealismPatcher
                     {
                         if (Templates.Any(x => x.Name == item.Name) || newItems.Any(x => item.Name == x.Name && item.ItemID != x.ItemID))
                         {
-                            item.Name = Interaction.InputBox("Item Name is not unique." + Environment.NewLine + (item.LocaleName == "" ? item.Name : item.LocaleName), "Name Error", item.Name);
+                            item.Name = Interaction.InputBox("Item Name is not unique." + Environment.NewLine + (item.LocaleName == "" ? item.Name : item.LocaleName), "Name Error", item.Name.Replace(" ", "_"));
+                        }
+
+                        if (!chkIsRetexture.Checked)
+                        {
+                            item.TemplateID = null;
                         }
 
                         writer.WritePropertyName(item.ItemID);
@@ -181,7 +185,7 @@ namespace SPTRealismPatcher
                     }
                     writer.WriteEndObject();
                 }
-                if(File.Exists(fileName))
+                if (File.Exists(fileName))
                 {
                     File.AppendAllLines(fileName, sb.ToString().Split(@"\r\n"));
                 }
@@ -228,12 +232,12 @@ namespace SPTRealismPatcher
                         join templates in Templates
                             on items.ItemTplToClone equals templates.ItemID
                         where templates != null
-                        select new RealismTemplate(items.ItemID, items.ItemFullName, templates.Properties, items.ItemName, items.OrigFileName);
+                        select new RealismTemplate(items.ItemID, items.ItemFullName, templates.Properties, items.ItemName, items.OrigFileName, items.ItemTplToClone);
             if (IgnoreExistingItems)
             {
                 query = query.Where(x => !PatchedItems.Any(z => z.ItemID == x.ItemID));
             }
-            
+
             newItems.AddRange(query);
 
             //If a mod references items from itself
@@ -241,7 +245,7 @@ namespace SPTRealismPatcher
                     join clonedItems in newItems
                         on items.ItemTplToClone equals clonedItems.ItemID
                     where clonedItems != null
-                    select new RealismTemplate(items.ItemID, items.ItemFullName, clonedItems.Properties, items.ItemName, items.OrigFileName);
+                    select new RealismTemplate(items.ItemID, items.ItemFullName, clonedItems.Properties, items.ItemName, items.OrigFileName, items.ItemTplToClone);
             if (IgnoreExistingItems)
             {
                 query = query.Where(x => !PatchedItems.Any(z => z.ItemID == x.ItemID));
@@ -254,7 +258,7 @@ namespace SPTRealismPatcher
                     join patchedItems in PatchedItems
                         on items.ItemTplToClone equals patchedItems.ItemID
                     where patchedItems != null
-                    select new RealismTemplate(items.ItemID, items.ItemFullName, patchedItems.Properties, items.ItemName, items.OrigFileName);
+                    select new RealismTemplate(items.ItemID, items.ItemFullName, patchedItems.Properties, items.ItemName, items.OrigFileName, items.ItemTplToClone);
             if (IgnoreExistingItems)
             {
                 query = query.Where(x => !PatchedItems.Any(z => z.ItemID == x.ItemID));
@@ -275,6 +279,11 @@ namespace SPTRealismPatcher
         }
 
         private void frmMain_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
 
         }

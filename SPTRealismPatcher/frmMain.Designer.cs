@@ -37,6 +37,7 @@
             cmdLoadFiles = new Button();
             textBox1 = new TextBox();
             chkKeepOriginalFileStructure = new CheckBox();
+            chkIsRetexture = new CheckBox();
             SuspendLayout();
             // 
             // txtTemplatesPath
@@ -114,11 +115,23 @@
             chkKeepOriginalFileStructure.Text = "Keep original file structure";
             chkKeepOriginalFileStructure.UseVisualStyleBackColor = true;
             // 
+            // chkIsRetexture
+            // 
+            chkIsRetexture.AutoSize = true;
+            chkIsRetexture.Location = new Point(922, 110);
+            chkIsRetexture.Name = "chkIsRetexture";
+            chkIsRetexture.Size = new Size(107, 19);
+            chkIsRetexture.TabIndex = 13;
+            chkIsRetexture.Text = "Use TemplateID";
+            chkIsRetexture.UseVisualStyleBackColor = true;
+            chkIsRetexture.CheckedChanged += checkBox1_CheckedChanged;
+            // 
             // frmMain
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1108, 173);
+            Controls.Add(chkIsRetexture);
             Controls.Add(chkKeepOriginalFileStructure);
             Controls.Add(textBox1);
             Controls.Add(cmdLoadFiles);
@@ -146,5 +159,6 @@
         private Button cmdLoadFiles;
         private TextBox textBox1;
         private CheckBox chkKeepOriginalFileStructure;
+        private CheckBox chkIsRetexture;
     }
 }
